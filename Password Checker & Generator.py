@@ -14,7 +14,7 @@ if response.status_code == 200:
     wordlist = wordlist_content.split('\n')
 
 # Step 1 Generate title and authorship
-print("Password Checker & Generator \n Created by Preston Cotton")
+print("Password Checker & Generator \n Created by Preston Cotton \n Credits to Ignis-Sec on Github for the wordlist"")
 
 # Step 2 Prompt user to choose check password strength or generate password
 userChoice = str(input("Enter \"c\" to check a current password or \"g\" to generate a new password: "))
