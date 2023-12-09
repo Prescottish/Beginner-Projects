@@ -1,0 +1,185 @@
+# Import modules
+import random
+
+# Global Constants
+MAX_LINES = 3
+MAX_BET = 1000
+MIN_BET = 1
+ROWS = 3
+COLS = 3
+
+# Set up symbols in each reel
+symbol_count = {
+    "$": 2,
+    "!": 4,
+    "*": 7,
+    "~": 9,
+}
+
+
+# Winnings multipliers
+symbol_values = {
+    "$": 7,
+    "!": 4,
+    "*": 3,
+    "~": 2,
+}
+
+
+def check_winnings(columns, lines, bet, values):
+    # Set winnings to base level
+    winnings = 0
+    #Set winning lines to base level
+    winnings_lines = []
+    # Iterate through every row
+    for line in range(lines):
+        # Selects a specific symbol to check
+        symbol = columns[0][line]
+        # Iterate through each column
+        for column in columns:
+            # Checks to see if symbol matches adjacent
+            symbol_to_check = column[line]
+            if symbol != symbol_to_check:
+                break
+        else:
+            # Calculates winning including multipliers
+            winnings += values[symbol] * bet
+            # Calculate amount of lines won
+            winnings_lines.append(line + 1)
+    return winnings, winnings_lines
+
+
+# Function to spin the slot machine
+def slotmachinespin(rows, cols, symbols):
+    all_symbols = []
+    # Associates each symbol with occurrence
+    for symbols, symbol_count, in symbols.items():
+        # Iterates through dictionary
+        for _ in range(symbol_count):
+            # Adds the symbol after each iteration
+            all_symbols.append(symbols)
+    # Values in each sub-column
+    columns = []
+    for _ in range(cols):
+        column = []
+        # Copied list for later reference
+        current_symbols = all_symbols[:]
+        for _ in range(rows):
+            value = random.choice(current_symbols)
+            # Removes chosen symbol from current list to prevent invalid choices
+            current_symbols.remove(value)
+            column.append(value)
+        # Adds the columns with value back into the actual column
+        columns.append(column)
+    return columns
+
+
+def display_slot_machine(columns):
+    # Loop through every column present
+    for row in range(len(columns[0])):
+        # Establish a sequential order for columns
+        for i, column in enumerate(columns):
+            # Prevents from placing | in the last column
+            if i != len(column) - 1:
+                print(column[row], end=" | ")
+            else:
+                print(column[row], end="")
+        print()
+
+
+# Create function for deposit system
+def deposit():
+    while True:
+        amount = input("What would you like to deposit?: $")
+        # Ensures that only a number is entered by a user
+        if amount.isdigit():
+            # Converts string to integer
+            amount = int(amount)
+            # Makes only a nonzero positive number valid
+            if amount > 0:
+                break
+            else:
+                print("Amount must be greater than 0.")
+        else:
+            print("Please enter a number.")
+    return amount
+
+
+# This functions ask amount of betting lines
+def bettinglines():
+    while True:
+        lines = input("How many lines would like to bet on (1-" + str(MAX_LINES) + ")?: ")
+        # Ensures that only a number is entered by a user
+        if lines.isdigit():
+            # Converts string to integer
+            lines = int(lines)
+            # Makes only a nonzero positive number valid
+            if 1 <= lines <= MAX_LINES:
+                break
+            else:
+                print("Enter a valid number of lines.")
+        else:
+            print("Please enter a number.")
+    return lines
+
+
+# This function asks the user how money they want to bet on each line
+def getbet():
+    while True:
+        amount = input("What would you like to bet on each line: $")
+        # Ensures that only a number is entered by a user
+        if amount.isdigit():
+            # Converts string to integer
+            amount = int(amount)
+            # Bet amount can is between minimum and maximum
+            if MIN_BET <= amount <= MAX_BET:
+                break
+            else:
+                print(f"Enter an amount between ${MIN_BET} and ${MAX_BET}.")
+        else:
+            print("Please enter a number.")
+    return amount
+
+
+def startspin(balance):
+    lines = bettinglines()
+    while True:
+        bet = getbet()
+        total_bet = bet * lines
+        if total_bet > balance:
+            print(f"You do not have enough to bet that amount, your current balance is {balance}")
+        else:
+            break
+    print(f"You are betting ${bet} on {lines} lines. The total bet is equal to ${total_bet}.")
+    slots = slotmachinespin(ROWS, COLS, symbol_count)
+    display_slot_machine(slots)
+    winnings, winning_lines = check_winnings(slots, lines, bet, symbol_values)
+    print(f"You won ${winnings}.")
+    print(f"You won on lines:", *winning_lines)
+    return winnings - total_bet
+
+
+# Create function to restart game
+def main():
+    print("Written by Preston C. \n Original design by TechwithTim")
+    balance = deposit()
+    initial_bal = balance
+    print(f"Current balance is ${balance}")
+    while True:
+        answer = input("Press enter to play (q to quit): ")
+        if answer == "q":
+            if balance > initial_bal:
+                print(f"You left with \033[1;32;40m${balance}\033[0m")
+                break
+            else:
+                print(f"You left with \033[1;31;40m${balance}\033[0m")
+                break
+        balance += startspin(balance)
+        if balance > initial_bal:
+            print(f"You currently have \033[1;32;40m${balance}\033[0m")
+        else:
+            print(f"You currently have \033[1;31;40m${balance}\033[0m")
+        print("\033[1m\033[4mWhats gambling really costing you?\033[0m")
+
+
+main()
